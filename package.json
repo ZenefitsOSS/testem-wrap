@@ -14,15 +14,8 @@
     "redis": "^0.12.1",
     "testem": "^0.9.0"
   },
-  "bin": {
-    "testem-wrap": "runner.js"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mde/testem-wrap.git"
-  },
-  "bugs": {
-    "url": "https://github.com/mde/testem-wrap/issues"
-  },
-  "homepage": "https://github.com/mde/testem-wrap#readme"
+    "url": "git+https://github.com/zenefits/testem-wrap.git"
+  }
 }
