@@ -1,0 +1,21 @@
+{
+  "cwd": "dist",
+  "launch_in_ci": [
+    "PhantomJS"
+  ],
+  "launch_in_dev": [
+    "PhantomJS",
+    "Chrome"
+  ],
+  "framework": "custom",
+  "routes": {
+    "/vendor": "../vendor"
+  },
+  "proxies": {
+    "/api": {
+      "target": "http://localhost:9001"
+    }
+  }
+}
+
+
