@@ -81,40 +81,42 @@ function main(){
   else {
     var api = new Api();
 
-	var writer = process.stdout.write;
-	process.stdout.write = function () {
-	  //writer.apply(process.stdout, arguments);
-	};
+    var writer = process.stdout.write;
+    process.stdout.write = function () {
+      //writer.apply(process.stdout, arguments);
+    };
 
-    api.setup = function(mode, dependency, finalizer){
-	  var self = this;
-	  var App = require(path.join(testemPath, 'lib', dependency))
-	  var config = this.config = new Config(mode, this.options)
-	  this.configureLogging()
-	  config.read(function() {
-		self.app = new App(config, finalizer)
-		self.app.start()
-	    server = self.app.server;
-	  	server.on('server-start', function () {
-	      server.io.on('connection', function (socket) {
+    api.setup = function(mode, dependency, finalizer) {
+      var self = this;
+      var App = require(path.join(testemPath, 'lib', dependency))
+      var config = this.config = new Config(mode, this.options)
+      this.configureLogging()
+      config.read(function () {
+        self.app = new App(config, finalizer)
+        self.app.start()
+        server = self.app.server;
+        server.on('server-start', function () {
+          server.io.on('connection', function (socket) {
             socket.on('test-result', function (data) {
               writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
-			});
+            });
             socket.on('all-test-results', function (data) {
               bridge.sendCmd({command: 'done'});
               bridge.stop();
               writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
-			});
-		  });
-		});
-	  })
-	}
+            });
+          });
+        });
+      });
+    };
 
-    if (appMode === 'ci'){
+    if (appMode === 'ci') {
       api.startCI(progOptions)
-    }else if (appMode === 'dev'){
+    }
+    else if (appMode === 'dev') {
       api.startDev(progOptions)
-    }else if (appMode === 'server'){
+    }
+    else if (appMode === 'server') {
       api.startServer(progOptions)
     }
   }
