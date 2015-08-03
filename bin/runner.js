@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var log = require('npmlog')
 var spawn = require('child_process').spawn;
 var path = require('path');
 var args = process.argv.slice(3);
@@ -88,13 +87,11 @@ function main(){
 
     api.setup = function(mode, dependency, finalizer) {
       var self = this;
-      var App = require(path.join(testemPath, 'lib', dependency))
-      var config = this.config = new Config(mode, this.options)
-      this.configureLogging()
-      config.read(function () {
-        self.app = new App(config, finalizer)
-        self.app.start()
-        server = self.app.server;
+      var App = require(path.join(testemPath, 'lib', dependency));
+      var config = this.config = new Config(mode, this.options);
+      // Expose the SocketIO connection for reporting results
+      var configureSocket = function () {
+        var server = self.app.server;
         server.on('server-start', function () {
           server.io.on('connection', function (socket) {
             socket.on('test-result', function (data) {
@@ -107,6 +104,24 @@ function main(){
             });
           });
         });
+      };
+
+      this.configureLogging();
+      config.read(function () {
+        self.app = new App(config, finalizer)
+        self.app.start();
+        if (appMode == 'ci') {
+          configureSocket();
+        }
+        else if (appMode == 'dev') {
+          var origConfigure = self.app.configure;
+          self.app.configure = function (cb) {
+            origConfigure.call(self.app, function () {
+              cb.call(this);
+              configureSocket();
+            });
+          };
+        }
       });
     };
 
