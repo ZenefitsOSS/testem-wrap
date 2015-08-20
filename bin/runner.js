@@ -70,7 +70,7 @@ main()
 function main(){
   program.parse(args)
 
-  var config = new Config(appMode, progOptions)
+  var config = new Config(appMode, progOptions);
 
   if (appMode === 'launchers'){
     config.read(function(){
@@ -82,7 +82,9 @@ function main(){
 
     var writer = process.stdout.write;
     process.stdout.write = function () {
-      //writer.apply(process.stdout, arguments);
+      if (progOptions.debug) {
+        writer.apply(process.stdout, arguments);
+      }
     };
 
     api.setup = function(mode, dependency, finalizer) {
