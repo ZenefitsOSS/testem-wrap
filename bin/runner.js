@@ -150,8 +150,16 @@ function act(fun){
   }
 }
 
-process.on('SIGINT', function () {
-  bridge.sendCmd({command: 'done'});
-  bridge.stop();
-});
+var ended = false;
+var end = function () {
+  if (!ended) {
+    end = true;
+    bridge.sendCmd({command: 'done'});
+    bridge.stop();
+  }
+}
+
+
+process.on('SIGINT', end);
+process.on('exit', end);
 
