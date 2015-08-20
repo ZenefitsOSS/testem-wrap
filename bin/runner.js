@@ -96,6 +96,9 @@ function main(){
         var server = self.app.server;
         server.on('server-start', function () {
           server.io.on('connection', function (socket) {
+            socket.on('console', function (data) {
+              writer.call(process.stdout, '{"console": ' + JSON.stringify(data) + '}\n');
+            });
             socket.on('test-result', function (data) {
               writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
             });

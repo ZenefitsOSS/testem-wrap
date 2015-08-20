@@ -12,7 +12,7 @@
     "commander": "^2.8.1",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "^0.9.0"
+    "testem": "git+https://github.com/zenefits/testem#bae08a068f3590ebe72c0ad361d783bd68214cdb"
   },
   "repository": {
     "type": "git",
