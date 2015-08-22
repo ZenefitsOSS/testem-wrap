@@ -80,12 +80,13 @@ function main(){
   else {
     var api = new Api();
 
-    var writer = process.stdout.write;
+    /*var writer = process.stdout.write;
     process.stdout.write = function () {
       if (progOptions.debug) {
         writer.apply(process.stdout, arguments);
       }
     };
+  */
 
     api.setup = function(mode, dependency, finalizer) {
       var self = this;
@@ -97,15 +98,17 @@ function main(){
         server.on('server-start', function () {
           server.io.on('connection', function (socket) {
             socket.on('console', function (data) {
-              writer.call(process.stdout, '{"console": ' + JSON.stringify(data) + '}\n');
+              var method = data.method;
+			  var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
+              console[data.method].apply(console, args);
             });
-            socket.on('test-result', function (data) {
-              writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
-            });
+            //socket.on('test-result', function (data) {
+            //  writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
+            //});
             socket.on('all-test-results', function (data) {
               bridge.sendCmd({command: 'done'});
               bridge.stop();
-              writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
+              //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
             });
           });
         });
