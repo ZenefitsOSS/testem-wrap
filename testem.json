@@ -14,6 +14,9 @@
   "proxies": {
     "/api": {
       "target": "http://localhost:9001"
+    },
+    "/custom_api": {
+      "target": "http://localhost:9001"
     }
   }
 }
