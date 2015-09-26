@@ -165,7 +165,13 @@ var end = function () {
   }
 }
 
+var exception = function(err) {
+  console.log('Uncaught exception: ', err);
+  bridge.stop();
+  process.exit(1);
+};
 
+process.on('uncaughtException', exception);
 process.on('SIGINT', end);
 process.on('exit', end);
 
