@@ -19,6 +19,7 @@ process.chdir(path.join(process.cwd(), projectPath));
 args.unshift('node');
 args.unshift(path.join(process.cwd(), './node_modules/.bin/testem'));
 
+bridge.start();
 
 program
   .version(require(testemPath + '/package').version)
@@ -26,8 +27,6 @@ program
   .option('-f, --file [file]', 'config file - defaults to testem.json or testem.yml')
   .option('-p, --port [num]', 'server port - defaults to 7357', Number)
   .option('--host [hostname]', 'host name - defaults to localhost', String)
-  .option('-i, --channel_in [channel]', 'redis channel for incoming messages', String)
-  .option('-o, --channel_out [channel]', 'redis channel for outgoing messages', String)
   .option('-l, --launch [list]', 'list of launchers to launch(comma separated)')
   .option('-s, --skip [list]', 'list of launchers to skip(comma separated)')
   .option('-d, --debug', 'output debug to debug log - testem.log')
@@ -67,6 +66,7 @@ program
   }))
 
 
+main()
 function main(){
   program.parse(args)
 
@@ -165,15 +165,7 @@ var end = function () {
   }
 }
 
-var exception = function(err) {
-  console.log('Uncaught exception: ', err);
-  bridge.stop();
-  process.exit(1);
-};
 
-process.on('uncaughtException', exception);
 process.on('SIGINT', end);
 process.on('exit', end);
 
-main()
-bridge.start(program.channel_in, program.channel_out);
