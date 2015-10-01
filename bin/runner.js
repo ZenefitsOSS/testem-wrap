@@ -5,7 +5,6 @@ var path = require('path');
 var args = process.argv.slice(3);
 var projectPath = process.argv[2];
 var Bridge = require('../lib/proxy_bridge').Bridge;
-var bridge = new Bridge();
 var testemPath = '../node_modules/testem';
 var program = require('commander')
 var progOptions = program
@@ -19,8 +18,6 @@ process.chdir(path.join(process.cwd(), projectPath));
 args.unshift('node');
 args.unshift(path.join(process.cwd(), './node_modules/.bin/testem'));
 
-bridge.start();
-
 program
   .version(require(testemPath + '/package').version)
   .usage('[options]')
@@ -32,6 +29,7 @@ program
   .option('-d, --debug', 'output debug to debug log - testem.log')
   .option('-t, --test_page [page]', 'the html page to drive the tests')
   .option('-g, --growl', 'turn on growl notifications')
+  .option('-u, --channel_uuid [uuid]', 'UUID to use for Redis pub/sub channels')
 
 
 program
@@ -78,16 +76,10 @@ function main(){
     })
   }
   else {
+    var bridge = new Bridge(program.channel_uuid);
     var api = new Api();
 
-    /*var writer = process.stdout.write;
-    process.stdout.write = function () {
-      if (progOptions.debug) {
-        writer.apply(process.stdout, arguments);
-      }
-    };
-  */
-
+    bridge.start();
     api.setup = function(mode, dependency, finalizer) {
       var self = this;
       var App = require(path.join(testemPath, 'lib', dependency));
