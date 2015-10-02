@@ -5,6 +5,7 @@ var path = require('path');
 var args = process.argv.slice(3);
 var projectPath = process.argv[2];
 var Bridge = require('../lib/proxy_bridge').Bridge;
+var bridge;
 var testemPath = '../node_modules/testem';
 var program = require('commander')
 var progOptions = program
@@ -76,10 +77,11 @@ function main(){
     })
   }
   else {
-    var bridge = new Bridge(program.channel_uuid);
     var api = new Api();
 
+    bridge = new Bridge(program.channel_uuid);
     bridge.start();
+
     api.setup = function(mode, dependency, finalizer) {
       var self = this;
       var App = require(path.join(testemPath, 'lib', dependency));
