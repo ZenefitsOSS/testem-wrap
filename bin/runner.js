@@ -162,4 +162,16 @@ var end = function () {
 
 process.on('SIGINT', end);
 process.on('exit', end);
+process.on('uncaughtException', function (err) {
+  console.error('Uncaught global exception in testem-wrap');
+  console.error(err.message);
+  if (err.stack) {
+    console.error(err.stack);
+  }
+  try {
+    end();
+  }
+  catch(e) {}
+  process.exit();
+});
 
