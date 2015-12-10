@@ -12,7 +12,7 @@
     "commander": "^2.8.1",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "git+https://github.com/zenefits/testem#fc42e08efe196ac71d42ce86aa3be07ba18591cc"
+    "testem": "git+https://github.com/aaminev/testem#add-pause-resume-support"
   },
   "repository": {
     "type": "git",

@@ -81,7 +81,7 @@ function main(){
 
     bridge = new Bridge(program.channel_uuid);
     bridge.start();
-
+    
     api.setup = function(mode, dependency, finalizer) {
       var self = this;
       var App = require(path.join(testemPath, 'lib', dependency));
@@ -90,10 +90,11 @@ function main(){
       var configureSocket = function () {
         var server = self.app.server;
         server.on('server-start', function () {
+
           server.io.on('connection', function (socket) {
             socket.on('console', function (data) {
               var method = data.method;
-			  var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
+              var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
               console[data.method].apply(console, args);
             });
             //socket.on('test-result', function (data) {
@@ -108,15 +109,41 @@ function main(){
         });
       };
 
+      var configureSocketToPassCommands = function() {
+        var server = self.app.server;
+        server.io.on('connection', function (socket) {
+          var resumeAckTimeout;
+
+          bridge.on('test-resume', function() {
+            socket.emit('test-resume');
+            clearTimeout(resumeAckTimeout);
+            resumeAckTimeout = setTimeout(function() {
+              bridge.sendCmd({command: 'resume-timeout-browser'});
+            }, 1000);
+          });
+
+          socket.on('test-resume-ack', function (data) {
+            clearTimeout(resumeAckTimeout);
+            bridge.sendCmd({command: 'test-resume-ack'});
+          });
+
+          socket.on('test-pause', function (data) {
+            bridge.sendCmd({command: 'test-pause'});
+          });
+        });
+      }
+
       this.configureLogging();
       config.read(function () {
         self.app = new App(config, finalizer)
         self.app.start();
+
         if (appMode == 'ci') {
           configureSocket();
-        }
-        else if (appMode == 'dev') {
+          self.app.server.on('server-start', configureSocketToPassCommands);
+        } else if (appMode == 'dev') {
           var origConfigure = self.app.configure;
+          setTimeout(configureSocketToPassCommands, 1000);
           self.app.configure = function (cb) {
             origConfigure.call(self.app, function () {
               cb.call(this);
@@ -141,7 +168,7 @@ function main(){
 
 // this is to workaround the weird behavior in command where
 // if you provide additional command line arguments that aren't
-// options, it goes in as a string as the 1st arguments of the 
+// options, it goes in as a string as the 1st arguments of the
 // "action" callback, we don't want this
 function act(fun){
   return function(){
@@ -154,7 +181,7 @@ var ended = false;
 var end = function () {
   if (!ended) {
     end = true;
-    bridge.sendCmd({command: 'done'});
+    bridge.sendCmd({command: 'interrupted'});
     bridge.stop();
   }
 }
