@@ -1,10 +1,9 @@
 {
   "cwd": "dist",
   "launch_in_ci": [
-    "PhantomJS"
+    "Chrome"
   ],
   "launch_in_dev": [
-    "PhantomJS",
     "Chrome"
   ],
   "framework": "custom",
