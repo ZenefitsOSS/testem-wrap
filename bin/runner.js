@@ -116,7 +116,11 @@ function main(){
       // }, 5000);
       // bridge.sendCmd({command: 'log', msg: 'runner.js: got start-next-test from bridge, send to browser'});
       log('Start test: ' + data.test_filter);
-      // log('python >>> start-next-test >>> browser', data);
+      if ( data.data) {
+        data.dataStr = encodeURIComponent(JSON.stringify(data.data));
+        delete data.data;
+      }
+      // log('python >>> start-next-test >>> browser', JSON.stringify(data, '', '  ') );
       currentSocket.emit('start-next-test', data);
     });
 
@@ -167,8 +171,8 @@ function main(){
           });
 
 
-          socket.on('start-next-test', function (data) {
-            // log('browser >>> start-next-test-ack');
+          socket.on('start-next-test-ack', function (data) {
+            log('browser >>> start-next-test-ack, newHref: ' + data.newHref);
             // bridge.sendCmd({command: 'log', msg: 'runner.js: browser sent start-next-test-ack'});
           });
 
@@ -195,7 +199,13 @@ function main(){
               }
             } else {
               log('Tests FAILED');
-              log(data);
+              var str;
+              try {
+                str = JSON.stringify(data, '', '  ');
+              } catch(e) {
+                str = data;
+              }
+              log(str);
             }
             log('------------------------------------------------------------------------------------');
             

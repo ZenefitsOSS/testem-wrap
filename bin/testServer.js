@@ -94,6 +94,7 @@ function killRunner() {
 }
 
 process.on('SIGINT', killRunner);
+// process.on('SIGKILL', killRunner);
 process.on('exit', killRunner);
 process.on('error', function() {
   try {
