@@ -10,9 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^2.8.1",
+    "debug": "^2.2.0",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "git+https://github.com/aaminev/testem#add-pause-resume-support"
+    "testem": "git+https://github.com/aaminev/testem#add-pause-resume-support",
+    "uuid": "^2.0.1"
   },
   "repository": {
     "type": "git",

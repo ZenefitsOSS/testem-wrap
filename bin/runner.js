@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+// var debug = require('debug');
+// debug.enable('testServer:*');
+// var log = debug('testServer:runner:');
+
 var spawn = require('child_process').spawn;
 var path = require('path');
 var args = process.argv.slice(3);
@@ -13,6 +17,12 @@ var Config = require(path.join(testemPath, 'lib/config'));
 var Api = require(path.join(testemPath, 'lib/api'));
 var appMode = 'dev'
 var proc;
+
+var log = function() {
+  var args = Array.prototype.slice.call(arguments);
+  args.unshift('testServer:runner:');
+  console.log.apply(console, args);
+}
 
 process.chdir(path.join(process.cwd(), projectPath));
 
@@ -31,6 +41,7 @@ program
   .option('-t, --test_page [page]', 'the html page to drive the tests')
   .option('-g, --growl', 'turn on growl notifications')
   .option('-u, --channel_uuid [uuid]', 'UUID to use for Redis pub/sub channels')
+  .option('-u, --proxy_port [num]', 'overwrite port for proxies')
 
 
 program
@@ -79,9 +90,38 @@ function main(){
   else {
     var api = new Api();
 
-    bridge = new Bridge(program.channel_uuid);
+    bridge = new Bridge(program.channel_uuid, program.proxy_port);
+    var bridgeHandlersSet = false;
+    var currentSocket;
+    var resumeAckTimeout;
+    var lastFilter;
+
+    var pingTimer;setInterval(function() {
+
+    });
+
+    bridge.on('test-resume', function() {
+      currentSocket.emit('test-resume');
+      clearTimeout(resumeAckTimeout);
+      resumeAckTimeout = setTimeout(function() {
+        bridge.sendCmd({command: 'resume-timeout-browser'});
+      }, 1000);
+    });
+
+    bridge.on('start-next-test', function(data) {
+      lastFilter = data.test_filter;
+      // pingTimer = setInterval(function() {
+      //   log('sent ping to pyhton');
+      //   bridge.sendCmd({command: 'ping'});
+      // }, 5000);
+      // bridge.sendCmd({command: 'log', msg: 'runner.js: got start-next-test from bridge, send to browser'});
+      log('Start test: ' + data.test_filter);
+      // log('python >>> start-next-test >>> browser', data);
+      currentSocket.emit('start-next-test', data);
+    });
+
     bridge.start();
-    
+
     api.setup = function(mode, dependency, finalizer) {
       var self = this;
       var App = require(path.join(testemPath, 'lib', dependency));
@@ -97,12 +137,18 @@ function main(){
               var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
               console[data.method].apply(console, args);
             });
+            socket.on('ping', function() {
+              // log('browser >>> ping');
+              // bridge.sendCmd({command: 'log', msg: 'runner.js: got ping'});
+            });
             //socket.on('test-result', function (data) {
             //  writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
             //});
             socket.on('all-test-results', function (data) {
+              // log('browser >>> all-test-results', data);
+              // bridge.sendCmd({command: 'log', msg: 'runner.js: all-test-results'});
               bridge.sendCmd({command: 'done'});
-              bridge.stop();
+              // bridge.stop();
               //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
             });
           });
@@ -112,14 +158,18 @@ function main(){
       var configureSocketToPassCommands = function() {
         var server = self.app.server;
         server.io.on('connection', function (socket) {
-          var resumeAckTimeout;
 
-          bridge.on('test-resume', function() {
-            socket.emit('test-resume');
-            clearTimeout(resumeAckTimeout);
-            resumeAckTimeout = setTimeout(function() {
-              bridge.sendCmd({command: 'resume-timeout-browser'});
-            }, 1000);
+          currentSocket = socket;
+
+          socket.on('ping', function() {
+            // log('browser >>> ping');
+            // bridge.sendCmd({command: 'log', msg: 'runner.js: got ping'});
+          });
+
+
+          socket.on('start-next-test', function (data) {
+            // log('browser >>> start-next-test-ack');
+            // bridge.sendCmd({command: 'log', msg: 'runner.js: browser sent start-next-test-ack'});
           });
 
           socket.on('test-resume-ack', function (data) {
@@ -129,6 +179,35 @@ function main(){
 
           socket.on('test-pause', function (data) {
             bridge.sendCmd({command: 'test-pause'});
+          });
+
+          socket.on('all-test-results', function (data) {
+            clearInterval(pingTimer);
+            // log('browser >>> all-test-results >>> python(done)', data);
+            if ( data.failed === 0 ) {
+              if ( data.passed > 0 ) {
+                log('Tests PASSED:')
+                data.tests.forEach(function(t) {
+                  log('' + t.id + '. ' + t.name);
+                });
+              } else {
+                log('No tests found for filter ' + lastFilter);
+              }
+            } else {
+              log('Tests FAILED');
+              log(data);
+            }
+            log('------------------------------------------------------------------------------------');
+            
+            // bridge.sendCmd({command: 'log', msg: 'runner.js: all-test-results: ' + JSON.stringify(data)});
+            bridge.sendCmd({
+              command: 'done', 
+              result: true,
+              data: data,
+              error: null
+            });
+            // bridge.stop();
+            //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
           });
         });
       }
