@@ -95,6 +95,7 @@ function main(){
     var currentSocket;
     var resumeAckTimeout;
     var lastFilter;
+    var gotFirstAllTestsMsg = false;
 
     var pingTimer;setInterval(function() {
 
@@ -109,6 +110,7 @@ function main(){
     });
 
     bridge.on('start-next-test', function(data) {
+      bridge.sendCmd({command: 'start-next-test-ack'});
       lastFilter = data.test_filter;
       // pingTimer = setInterval(function() {
       //   log('sent ping to pyhton');
@@ -117,9 +119,11 @@ function main(){
       // bridge.sendCmd({command: 'log', msg: 'runner.js: got start-next-test from bridge, send to browser'});
       log('Start test: ' + data.test_filter);
       if ( data.data) {
+        log('data for browser:\n' + JSON.stringify(data.data, '', '  '));
         data.dataStr = encodeURIComponent(JSON.stringify(data.data));
         delete data.data;
       }
+      log('run id: ' + data.run_id);
       // log('python >>> start-next-test >>> browser', JSON.stringify(data, '', '  ') );
       currentSocket.emit('start-next-test', data);
     });
@@ -172,7 +176,7 @@ function main(){
 
 
           socket.on('start-next-test-ack', function (data) {
-            log('browser >>> start-next-test-ack, newHref: ' + data.newHref);
+            // log('browser >>> start-next-test-ack, newHref: ' + data.newHref);
             // bridge.sendCmd({command: 'log', msg: 'runner.js: browser sent start-next-test-ack'});
           });
 
@@ -187,7 +191,18 @@ function main(){
 
           socket.on('all-test-results', function (data) {
             clearInterval(pingTimer);
+            if ( !gotFirstAllTestsMsg ) {
+              gotFirstAllTestsMsg = true;
+              log('Browser loaded and ready');
+              return;
+            }
             // log('browser >>> all-test-results >>> python(done)', data);
+            var msg = {
+              command: 'done', 
+              result: true,
+              data: data,
+              error: null
+            };
             if ( data.failed === 0 ) {
               if ( data.passed > 0 ) {
                 log('Tests PASSED:')
@@ -195,13 +210,18 @@ function main(){
                   log('' + t.id + '. ' + t.name);
                 });
               } else {
+                msg.result = false;
+                msg.error = 'No tests found for filter ' + lastFilter;
                 log('No tests found for filter ' + lastFilter);
               }
             } else {
               log('Tests FAILED');
+              msg.result = false;
+              msg.error = 'ERROR';
               var str;
               try {
                 str = JSON.stringify(data, '', '  ');
+                msg.error = str;
               } catch(e) {
                 str = data;
               }
@@ -210,12 +230,7 @@ function main(){
             log('------------------------------------------------------------------------------------');
             
             // bridge.sendCmd({command: 'log', msg: 'runner.js: all-test-results: ' + JSON.stringify(data)});
-            bridge.sendCmd({
-              command: 'done', 
-              result: true,
-              data: data,
-              error: null
-            });
+            bridge.sendCmd(msg);
             // bridge.stop();
             //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
           });

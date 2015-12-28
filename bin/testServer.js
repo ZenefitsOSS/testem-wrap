@@ -1,14 +1,6 @@
 process.chdir(process.cwd());
 
 var debug = require('debug');
-debug.enable('testServer:*');
-var log = debug('testServer:');
-var runnerLogPrefix = 'testServer:runner:';
-var bridgeLogPrefix = 'testServer:bridge:';
-var logRunner = debug(runnerLogPrefix);
-var logBridge = debug(bridgeLogPrefix);
-log('Start server');
-log('---------------------------')
 
 
 var path = require('path');
@@ -24,8 +16,19 @@ var testemPort = process.argv[4];
 var isChrome = process.argv[5];
 var testemPath = './node_modules/testem';
 var tempConfigPath = path.join(process.cwd(), appPath, 'tmp/testem.json');
+
+var logPrefix = 'testServer:';
+debug.enable(logPrefix + '*');
+var log = debug(logPrefix + appPath);
+var runnerLogPrefix = 'runner';
+var bridgeLogPrefix = 'bridge';
+var logRunner = debug(logPrefix + appPath + ':' + runnerLogPrefix);
+var logBridge = debug(logPrefix + appPath + ':' + bridgeLogPrefix);
+log('Start server');
+log('---------------------------')
+
 var config = require('../testem.json');
-log('default config', config, appPath, proxyPort, isChrome);
+// log('default config', config, appPath, proxyPort, isChrome);
 
 var redisInClient = redis.createClient();
 var redisOutClient = redis.createClient();
@@ -62,11 +65,15 @@ var ch = spawn('node', [
 ch.stdout.on('data', function (data, a, b) {
   // console.log('runner stdout: ' + data);
   var msg = data.toString().trim();
-  if ( msg.indexOf(runnerLogPrefix) === 0 ) {
-    logRunner(msg.substr(runnerLogPrefix.length));
+  
+  runnerPrefix = logPrefix + runnerLogPrefix + ':';
+  if ( msg.indexOf(runnerPrefix) === 0 ) {
+    logRunner(msg.substr(runnerPrefix.length + 1));
   }
-  if ( msg.indexOf(bridgeLogPrefix) === 0 ) {
-    logBridge(msg.substr(bridgeLogPrefix.length));
+
+  var bridgePrefix = logPrefix + bridgeLogPrefix + ':';
+  if ( msg.indexOf(bridgePrefix) === 0 ) {
+    logBridge(msg.substr(bridgePrefix.length + 1));
   }
 });
 
@@ -80,15 +87,16 @@ ch.stderr.on('data', function (data) {
 });
 
 ch.on('error', function (err) {
-  // console.log('error ', err);
+  console.log('error ', err);
 });
 
 ch.on('close', function (code) {
-  console.log('close');
+  console.log('Testem runner closed for app ' + appPath);
   process.exit();
 });
 
 function killRunner() {
+  console.log('killing runner');
   ch.kill();
   process.exit();
 }
@@ -96,13 +104,16 @@ function killRunner() {
 process.on('SIGINT', killRunner);
 // process.on('SIGKILL', killRunner);
 process.on('exit', killRunner);
-process.on('error', function() {
+process.on('error', function(err) {
+  console.log('Test server process error', err);
   try {
     killRunner();
   } catch(e) {}
 });
 process.on('uncaughtException', function (err) {
+  console.log('Test server uncaughtException', err);
   try {
+
     killRunner();
   } catch(e) {}
 });
