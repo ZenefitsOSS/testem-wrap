@@ -63,7 +63,7 @@ var ch = spawn('node', [
 });
 
 ch.stdout.on('data', function (data, a, b) {
-  // console.log('runner stdout: ' + data);
+  console.log('runner stdout: ' + data);
   var msg = data.toString().trim();
   
   runnerPrefix = logPrefix + runnerLogPrefix + ':';
@@ -78,7 +78,7 @@ ch.stdout.on('data', function (data, a, b) {
 });
 
 ch.stderr.on('data', function (data) {
-  // console.log('runner stderr: ' + data.toString().trim());
+  console.log('runner stderr: ' + data.toString().trim());
   // var msg = data.toString().trim();
   // var idx = msg.indexOf('testServer:runner:');
   // if ( idx !== -1 ) {
@@ -90,8 +90,8 @@ ch.on('error', function (err) {
   console.log('error ', err);
 });
 
-ch.on('close', function (code) {
-  console.log('Testem runner closed for app ' + appPath);
+ch.on('close', function (code, str) {
+  console.log('Testem runner closed for app ' + appPath, code, str);
   process.exit();
 });
 
