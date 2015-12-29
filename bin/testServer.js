@@ -63,7 +63,7 @@ var ch = spawn('node', [
 });
 
 ch.stdout.on('data', function (data, a, b) {
-  console.log('runner stdout: ' + data);
+  // console.log('runner stdout: ' + data);
   var msg = data.toString().trim();
   
   runnerPrefix = logPrefix + runnerLogPrefix + ':';
