@@ -296,7 +296,8 @@ process.on('exit', function(code) {
   console.log('runner exit' + code);
 });
 process.on('uncaughtException', function (err) {
-  console.error('Uncaught global exception in testem-wrap');
+  log('Uncaught global exception in testem-wrap', err.message, err.stack);
+  console.error('Uncaught global exception in testem-wrap', new Date());
   console.error(err.message);
   if (err.stack) {
     console.error(err.stack);
