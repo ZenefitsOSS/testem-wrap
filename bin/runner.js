@@ -97,9 +97,7 @@ function main(){
     var lastFilter;
     var gotFirstAllTestsMsg = false;
 
-    var pingTimer;setInterval(function() {
-
-    });
+    var pingTimer;
 
     bridge.on('test-resume', function() {
       currentSocket.emit('test-resume');
@@ -135,33 +133,33 @@ function main(){
       var App = require(path.join(testemPath, 'lib', dependency));
       var config = this.config = new Config(mode, this.options);
       // Expose the SocketIO connection for reporting results
-      var configureSocket = function () {
-        var server = self.app.server;
-        server.on('server-start', function () {
+      // var configureSocket = function () {
+      //   var server = self.app.server;
+      //   server.on('server-start', function () {
 
-          server.io.on('connection', function (socket) {
-            socket.on('console', function (data) {
-              var method = data.method;
-              var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
-              console[data.method].apply(console, args);
-            });
-            socket.on('ping', function() {
-              // log('browser >>> ping');
-              // bridge.sendCmd({command: 'log', msg: 'runner.js: got ping'});
-            });
-            //socket.on('test-result', function (data) {
-            //  writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
-            //});
-            socket.on('all-test-results', function (data) {
-              // log('browser >>> all-test-results', data);
-              // bridge.sendCmd({command: 'log', msg: 'runner.js: all-test-results'});
-              bridge.sendCmd({command: 'done'});
-              // bridge.stop();
-              //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
-            });
-          });
-        });
-      };
+      //     server.io.on('connection', function (socket) {
+      //       socket.on('console', function (data) {
+      //         var method = data.method;
+      //         var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
+      //         console[data.method].apply(console, args);
+      //       });
+      //       socket.on('ping', function() {
+      //         // log('browser >>> ping');
+      //         // bridge.sendCmd({command: 'log', msg: 'runner.js: got ping'});
+      //       });
+      //       //socket.on('test-result', function (data) {
+      //       //  writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
+      //       //});
+      //       socket.on('all-test-results', function (data) {
+      //         // log('browser >>> all-test-results', data);
+      //         // bridge.sendCmd({command: 'log', msg: 'runner.js: all-test-results'});
+      //         bridge.sendCmd({command: 'done'});
+      //         // bridge.stop();
+      //         //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
+      //       });
+      //     });
+      //   });
+      // };
 
       var configureSocketToPassCommands = function() {
         var server = self.app.server;
@@ -243,7 +241,7 @@ function main(){
         self.app.start();
 
         if (appMode == 'ci') {
-          configureSocket();
+          // configureSocket();
           self.app.server.on('server-start', configureSocketToPassCommands);
         } else if (appMode == 'dev') {
           var origConfigure = self.app.configure;
@@ -251,7 +249,7 @@ function main(){
           self.app.configure = function (cb) {
             origConfigure.call(self.app, function () {
               cb.call(this);
-              configureSocket();
+              // configureSocket();
             });
           };
         }
