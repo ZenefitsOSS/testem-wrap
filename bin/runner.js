@@ -108,7 +108,10 @@ function main(){
     });
 
     bridge.on('start-next-test', function(data) {
-      bridge.sendCmd({command: 'start-next-test-ack'});
+      setTimeout(function(){
+        bridge.sendCmd({command: 'start-next-test-ack'});
+      }, 100);
+      
       lastFilter = data.test_filter;
       // pingTimer = setInterval(function() {
       //   log('sent ping to pyhton');
