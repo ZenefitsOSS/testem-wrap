@@ -13,7 +13,7 @@
     "debug": "^2.2.0",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "git+https://github.com/aaminev/testem#d5ab589a9c3ec8f016dd07753db4c7462e8abc19",
+    "testem": "git+https://github.com/aaminev/testem#bd4605ec0f30388721a5ef04eaf8e79a7b728d4c",
     "uuid": "^2.0.1"
   },
   "repository": {

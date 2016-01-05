@@ -111,7 +111,7 @@ function main(){
       setTimeout(function(){
         bridge.sendCmd({command: 'start-next-test-ack'});
       }, 100);
-      
+
       lastFilter = data.test_filter;
       // pingTimer = setInterval(function() {
       //   log('sent ping to pyhton');
@@ -119,11 +119,11 @@ function main(){
       // }, 5000);
       // bridge.sendCmd({command: 'log', msg: 'runner.js: got start-next-test from bridge, send to browser'});
       log('Start test: ' + data.test_filter);
-      if ( data.data) {
+      if ( data.data ) {
         log('data for browser:\n' + JSON.stringify(data.data, '', '  '));
-        data.dataStr = encodeURIComponent(JSON.stringify(data.data));
-        delete data.data;
+        data.data = encodeURIComponent(JSON.stringify(data.data));
       }
+      
       log('run id: ' + data.run_id);
       // log('python >>> start-next-test >>> browser', JSON.stringify(data, '', '  ') );
       currentSocket.emit('start-next-test', data);
