@@ -171,13 +171,13 @@ function main(){
           currentSocket = socket;
 
           socket.on('ping', function() {
-            // log('browser >>> ping');
+            log('browser >>> ping');
             // bridge.sendCmd({command: 'log', msg: 'runner.js: got ping'});
           });
 
 
           socket.on('start-next-test-ack', function (data) {
-            // log('browser >>> start-next-test-ack, newHref: ' + data.newHref);
+            log('browser >>> start-next-test-ack, newHref: ' + data.newHref);
             // bridge.sendCmd({command: 'log', msg: 'runner.js: browser sent start-next-test-ack'});
           });
 
