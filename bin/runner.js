@@ -108,10 +108,6 @@ function main(){
     });
 
     bridge.on('start-next-test', function(data) {
-      setTimeout(function(){
-        bridge.sendCmd({command: 'start-next-test-ack'});
-      }, 100);
-
       lastFilter = data.test_filter;
       // pingTimer = setInterval(function() {
       //   log('sent ping to pyhton');
@@ -126,7 +122,12 @@ function main(){
       
       log('run id: ' + data.run_id);
       // log('python >>> start-next-test >>> browser', JSON.stringify(data, '', '  ') );
-      currentSocket.emit('start-next-test', data);
+      currentSocket.emit('start-next-test', data, function() {
+        setTimeout(function(){
+          bridge.currentRunId = data.run_id;
+          bridge.sendCmd({command: 'start-next-test-ack'});
+        }, 100);
+      });
     });
 
     bridge.start();
@@ -168,16 +169,31 @@ function main(){
         var server = self.app.server;
         server.io.on('connection', function (socket) {
 
+          var pingInterval = setInterval(function() {
+            socket.emit('server-ping', '', function() {
+              log('server-ping ack');
+            });
+          }, 1000);
+
+          log('new connection');
+
           currentSocket = socket;
 
-          socket.on('ping', function() {
-            log('browser >>> ping');
+          socket.on('disconnect', function() {
+            clearInterval(pingInterval);
+            log('socket disconnect');
+          });
+
+          socket.on('ping', function(data, fn) {
+            log('browser >>> ping', data);
+            fn();
             // bridge.sendCmd({command: 'log', msg: 'runner.js: got ping'});
           });
 
 
-          socket.on('start-next-test-ack', function (data) {
+          socket.on('start-next-test-ack', function (data, fn) {
             log('browser >>> start-next-test-ack, newHref: ' + data.newHref);
+            fn()
             // bridge.sendCmd({command: 'log', msg: 'runner.js: browser sent start-next-test-ack'});
           });
 
@@ -195,6 +211,10 @@ function main(){
             if ( !gotFirstAllTestsMsg ) {
               gotFirstAllTestsMsg = true;
               log('Browser loaded and ready');
+              return;
+            }
+            if ( !bridge.currentRunId ) {
+              log('got all-test-results without bridge.currentRunId');
               return;
             }
             // log('browser >>> all-test-results >>> python(done)', data);
