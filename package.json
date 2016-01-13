@@ -10,9 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^2.8.1",
+    "debug": "^2.2.0",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "git+https://github.com/zenefits/testem#fc42e08efe196ac71d42ce86aa3be07ba18591cc"
+    "testem": "git+https://github.com/aaminev/testem#a319f4e8099efa6f4fe22c377bcd19e62255ccfc",
+    "uuid": "^2.0.1"
   },
   "repository": {
     "type": "git",
