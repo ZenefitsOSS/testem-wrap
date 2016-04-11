@@ -82,9 +82,9 @@ function main(){
     bridge = new Bridge(program.channel_uuid);
     bridge.start();
 
-    api.setup = function(mode, dependency, finalizer) {
+    api.setup = function(mode, finalizer) {
       var self = this;
-      var App = require(path.join(testemPath, 'lib', dependency));
+      var App = require(path.join(testemPath, 'lib', 'app'));
       var config = this.config = new Config(mode, this.options);
       // Expose the SocketIO connection for reporting results
       var configureSocket = function () {
@@ -141,7 +141,7 @@ function main(){
 
 // this is to workaround the weird behavior in command where
 // if you provide additional command line arguments that aren't
-// options, it goes in as a string as the 1st arguments of the 
+// options, it goes in as a string as the 1st arguments of the
 // "action" callback, we don't want this
 function act(fun){
   return function(){
