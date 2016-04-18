@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+require('dependency-checker')();
 var spawn = require('child_process').spawn;
 var path = require('path');
 var args = process.argv.slice(3);

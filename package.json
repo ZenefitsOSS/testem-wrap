@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^2.8.1",
+    "dependency-checker": "git+https://github.com/zenefits/dependency-checker#v0.0.2",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
     "testem": "git+https://github.com/zenefits/testem#v1.6.0-zenefits"
