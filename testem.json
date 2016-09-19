@@ -17,6 +17,9 @@
     },
     "/custom_api": {
       "target": "http://localhost:9001"
+    },
+    "/internal-services": {
+      "target": "http://localhost:9001"
     }
   }
 }
