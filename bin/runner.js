@@ -24,6 +24,7 @@ program
   .usage('[options]')
   .option('-f, --file [file]', 'config file - defaults to testem.json or testem.yml')
   .option('-p, --port [num]', 'server port - defaults to 7357', Number)
+  .option('-b, --bridge_port [num]', 'bridge server port - defaults to 9001', Number)
   .option('--host [hostname]', 'host name - defaults to localhost', String)
   .option('-l, --launch [list]', 'list of launchers to launch(comma separated)')
   .option('-s, --skip [list]', 'list of launchers to skip(comma separated)')
@@ -68,6 +69,18 @@ program
 main()
 function main(){
   program.parse(args)
+	var proxyPort = progOptions['bridge_port'];
+	progOptions['proxies'] = {
+    "/api": {
+      "host": "localhost", "port": proxyPort
+    },
+    "/custom_api": {
+      "host": "localhost", "port": proxyPort
+    },
+    "/internal-services": {
+      "host": "localhost", "port": proxyPort
+    }
+	};
 
   var config = new Config(appMode, progOptions);
 
@@ -79,7 +92,7 @@ function main(){
   else {
     var api = new Api();
 
-    bridge = new Bridge(program.channel_uuid);
+    bridge = new Bridge(program.channel_uuid, progOptions['bridge_port']);
     bridge.start();
 
     api.setup = function(mode, finalizer) {
