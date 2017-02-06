@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-require('dependency-checker')();
+//require('dependency-checker')();
 var spawn = require('child_process').spawn;
 var path = require('path');
 var args = process.argv.slice(3);
@@ -93,7 +93,7 @@ function main(){
           server.io.on('connection', function (socket) {
             socket.on('console', function (data) {
               var method = data.method;
-			  var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
+              var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
               console[data.method].apply(console, args);
             });
             //socket.on('test-result', function (data) {
