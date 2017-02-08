@@ -110,8 +110,35 @@ function main(){
 
       this.configureLogging();
       config.read(function () {
-        self.app = new App(config, finalizer)
+        self.app = new App(config, finalizer);
+        self.app.on('server-io-start', function (io) {
+          io.on('connection', function (socket) {
+            socket.on('console', function (data) {
+              var method = data.method;
+              var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
+              console[data.method].apply(console, args);
+            });
+
+            socket.on('test-result', function (data) {
+            //  writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
+              bridge.sendResult({outputType: 'test-result', output: data});
+            });
+            //socket.on('all-test-results', function (data) {
+              //bridge.sendCmd({command: 'done'});
+              //bridge.stop();
+              //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
+            //});
+          });
+        });
+
+        self.app.reporter.out = {
+          write: function (o) {
+            bridge.sendOutput({output: o});
+           }
+        };
+
         self.app.start();
+        /*
         if (appMode == 'ci') {
           configureSocket();
         }
@@ -124,6 +151,7 @@ function main(){
             });
           };
         }
+        */
       });
     };
 
