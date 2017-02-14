@@ -86,44 +86,30 @@ function main(){
       var self = this;
       var App = require(path.join(testemPath, 'lib', 'app'));
       var config = this.config = new Config(mode, this.options);
-      // Expose the SocketIO connection for reporting results
-      var configureSocket = function () {
-        var server = self.app.server;
-        server.on('server-start', function () {
-          server.io.on('connection', function (socket) {
-            socket.on('console', function (data) {
-              var method = data.method;
-			  var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
-              console[data.method].apply(console, args);
-            });
-            //socket.on('test-result', function (data) {
-            //  writer.call(process.stdout, '{"result": ' + JSON.stringify(data) + '}\n');
-            //});
-            socket.on('all-test-results', function (data) {
-              bridge.sendCmd({command: 'done'});
-              bridge.stop();
-              //writer.call(process.stdout, '{"results": ' + JSON.stringify(data) + '}\n');
-            });
-          });
-        });
-      };
 
       this.configureLogging();
       config.read(function () {
-        self.app = new App(config, finalizer)
-        self.app.start();
-        if (appMode == 'ci') {
-          configureSocket();
-        }
-        else if (appMode == 'dev') {
-          var origConfigure = self.app.configure;
-          self.app.configure = function (cb) {
-            origConfigure.call(self.app, function () {
-              cb.call(this);
-              configureSocket();
+        self.app = new App(config, finalizer);
+
+        self.app.on('server-io-start', function (io) {
+          io.on('connection', function (socket) {
+            socket.on('console', function (data) {
+              var method = data.method;
+              var args = ['console.' + method + ':'].concat(JSON.parse(data.args));
+              console[data.method].apply(console, args);
             });
-          };
-        }
+            /*
+            socket.on('test-result', function (data) {
+              bridge.sendResult({outputType: 'test-result', output: data});
+            });
+            socket.on('all-test-results', function (data) {
+              bridge.sendResult({outputType: 'all-test-results', output: data});
+            });
+            */
+          });
+        });
+
+        self.app.start();
       });
     };
 
