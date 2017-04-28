@@ -6,7 +6,7 @@ var args = process.argv.slice(3);
 var projectPath = process.argv[2];
 var Bridge = require('../lib/proxy_bridge').Bridge;
 var bridge;
-var testemPath = '../node_modules/testem';
+var testemPath = require.resolve('testem').replace('/lib/api.js', '');
 var program = require('commander')
 var progOptions = program
 var Config = require(path.join(testemPath, 'lib/config'));
