@@ -13,7 +13,7 @@
     "dependency-checker": "git+https://github.com/zenefits/dependency-checker#v0.0.2",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "git+https://github.com/zenefits/testem#v1.6.0-zenefits.2"
+    "testem": "git+https://github.com/aaminev/testem#4efdc6ead0265140afa90296089360d811f01f06"
   },
   "repository": {
     "type": "git",
