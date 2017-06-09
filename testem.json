@@ -1,7 +1,7 @@
 {
   "cwd": "dist",
   "launch_in_ci": [
-    "PhantomJS"
+    "Chrome"
   ],
   "launch_in_dev": [
     "PhantomJS",
@@ -10,6 +10,9 @@
   "framework": "custom",
   "routes": {
     "/vendor": "../vendor"
+  },
+  "browser_args": {
+    "Chrome": ["--headless", "--disable-gpu", "--remote-debugging-port=9222"]
   },
   "proxies": {
     "/api": {
