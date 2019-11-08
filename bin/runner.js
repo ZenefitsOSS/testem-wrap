@@ -5,6 +5,7 @@ var path = require('path');
 var args = process.argv.slice(3);
 var projectPath = process.argv[2];
 var Bridge = require('../lib/proxy_bridge').Bridge;
+var startGraphqlServer = require('../lib/graphql').startGraphqlServer;
 var bridge;
 var testemPath = require.resolve('testem').replace('/lib/api.js', '');
 var program = require('commander')
@@ -81,6 +82,10 @@ function main(){
 
     bridge = new Bridge(program.channel_uuid);
     bridge.start();
+
+    process.env.PORT = '9002'
+    process.env.BASEURL = 'http://localhost:9001'
+    startGraphqlServer();
 
     api.setup = function(mode, finalizer) {
       var self = this;
