@@ -9,13 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-register": "^6.26.0",
     "commander": "^2.8.1",
     "dependency-checker": "git+https://github.com/zenefits/dependency-checker#v0.0.2",
     "npmlog": "^1.2.1",
     "redis": "^0.12.1",
-    "testem": "git+https://github.com/zenefits/testem#v1.6.0-zenefits.2",
-    "zgraphql": "git+ssh://git@github.com/zenefits/zgraphql#v0.5.3"
+    "testem": "git+https://github.com/zenefits/testem#v1.6.0-zenefits.2"
   },
   "repository": {
     "type": "git",
