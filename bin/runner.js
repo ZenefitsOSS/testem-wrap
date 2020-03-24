@@ -14,6 +14,7 @@ var Config = require(path.join(testemPath, 'lib/config'));
 var Api = require(path.join(testemPath, 'lib/api'));
 var appMode = 'dev'
 var proc;
+var url = require('url');
 
 process.chdir(path.join(process.cwd(), projectPath));
 
@@ -79,13 +80,17 @@ function main(){
   }
   else {
     var api = new Api();
+    config.read(function(){
+      var proxiesConfig = config.getConfigProperty('proxies');
+      var graphqlUrl = url.parse(proxiesConfig['/graphql']['target']);
+      var apiUrl = url.parse(proxiesConfig['/api']['target']);
 
-    bridge = new Bridge(program.channel_uuid);
-    bridge.start();
-
-    process.env.PORT = '9002'
-    process.env.BASEURL = 'http://localhost:9001'
-    startGraphqlServer();
+      bridge = new Bridge(program.channel_uuid, apiUrl);
+      bridge.start();
+      process.env.PORT = graphqlUrl.port;
+      process.env.BASEURL = apiUrl.href;
+      startGraphqlServer();
+    });
 
     api.setup = function(mode, finalizer) {
       var self = this;
