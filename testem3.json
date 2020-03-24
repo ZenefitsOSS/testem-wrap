@@ -1,0 +1,32 @@
+{
+  "cwd": "dist",
+  "launch_in_ci": [
+    "PhantomJS"
+  ],
+  "launch_in_dev": [
+    "PhantomJS",
+    "Chrome"
+  ],
+  "framework": "custom",
+  "routes": {
+    "/vendor": "../vendor"
+  },
+  "port": 7360,
+  "proxies": {
+    "/api": {
+      "target": "http://localhost:9007"
+    },
+    "/graphql": {
+      "target": "http://localhost:9008"
+    },
+    "/custom_api": {
+      "target": "http://localhost:9007"
+    },
+    "/internal-services": {
+      "target": "http://localhost:9007"
+    }
+  }
+}
+
+
+
