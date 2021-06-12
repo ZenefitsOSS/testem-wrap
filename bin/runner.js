@@ -21,6 +21,7 @@ process.chdir(path.join(process.cwd(), projectPath));
 args.unshift('node');
 args.unshift(path.join(process.cwd(), './node_modules/.bin/testem'));
 
+const cypress = require('cypress');
 program
   .version(require(testemPath + '/package').version)
   .usage('[options]')
@@ -31,6 +32,8 @@ program
   .option('-s, --skip [list]', 'list of launchers to skip(comma separated)')
   .option('-d, --debug', 'output debug to debug log - testem.log')
   .option('-t, --test_page [page]', 'the html page to drive the tests')
+  .option('-c, --spec_file [page]', 'the spec file for cypress tests') //Will be handled by cypress wrap
+  .option('-r, --project_path [path]', 'path to cypress project') //Will be handled by cypress wrap
   .option('-g, --growl', 'turn on growl notifications')
   .option('-u, --channel_uuid [uuid]', 'UUID to use for Redis pub/sub channels')
 
@@ -79,7 +82,6 @@ function main(){
     })
   }
   else {
-    var api = new Api();
     config.read(function(){
       var proxiesConfig = config.getConfigProperty('proxies');
       var graphqlUrl = url.parse(proxiesConfig['/graphql']['target']);
@@ -89,9 +91,49 @@ function main(){
       bridge.start();
       process.env.PORT = graphqlUrl.port;
       process.env.BASEURL = apiUrl.href;
+
+      //if not cypress return early
       startGraphqlServer();
+      if (program.spec_file) {
+
+        //Change to z-frontend root for spec files to be discovered by cypress (only after graphql starts)
+        process.chdir(path.join(process.cwd(), '../../', projectPath));
+
+        //z-frontend app where the spec file would be found
+        var appPath = path.join(process.cwd(), ...program.spec_file.split(path.sep).slice(0,2));
+        cypress.run({
+          reporter: 'junit',
+          browser: 'electron',
+          config: {
+            baseUrl: apiUrl.href,
+            video: false,
+          },
+          //read spec from input args
+          spec: program.spec_file,
+          project: program.project_path,
+          env: {
+            'projectPath': appPath, //this projectPath is different from the one passed to testem wrap
+          }
+
+        }).then((results) => {
+          console.log(results)
+        }) .catch((err) => {
+          console.error(err)
+        })
+
+
+      }
+
     });
 
+
+    //if not testem quit
+    if (program.spec_file) {
+        return
+    }
+
+
+    var api = new Api();
     api.setup = function(mode, finalizer) {
       var self = this;
       var App = require(path.join(testemPath, 'lib', 'app'));
