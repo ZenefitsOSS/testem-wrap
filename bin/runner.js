@@ -192,14 +192,19 @@ var ended = false;
 var end = function () {
   if (!ended) {
     end = true;
+    console.log('end here');
     bridge.sendCmd({command: 'done'});
+    console.log('after sendCmd');
     bridge.stop();
+    console.log('after stop');
+    process.exit();
   }
 }
 
-
 process.on('SIGINT', end);
+console.log('SIGINT here');
 process.on('exit', end);
+console.log('exit here');
 process.on('uncaughtException', function (err) {
   console.error('Uncaught global exception in testem-wrap');
   console.error(err.message);
@@ -207,6 +212,7 @@ process.on('uncaughtException', function (err) {
     console.error(err.stack);
   }
   try {
+    console.log('trying end in uncaughtException')
     end();
   }
   catch(e) {}
