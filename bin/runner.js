@@ -72,30 +72,36 @@ program
 
 main()
 function main(){
+	console.log('enter main');
   program.parse(args)
 
   var config = new Config(appMode, progOptions);
 
   if (appMode === 'launchers'){
+		console.log('enter if');
     config.read(function(){
       config.printLauncherInfo()
     })
   }
   else {
+		console.log('enter else');
     config.read(function(){
+			console.log('enter config read');
       var proxiesConfig = config.getConfigProperty('proxies');
       var graphqlUrl = url.parse(proxiesConfig['/graphql']['target']);
       var apiUrl = url.parse(proxiesConfig['/api']['target']);
 
       bridge = new Bridge(program.channel_uuid, apiUrl);
+			console.log('before start');
       bridge.start();
+			console.log('after start');
       process.env.PORT = graphqlUrl.port;
       process.env.BASEURL = apiUrl.href;
 
       //if not cypress return early
       startGraphqlServer();
       if (program.spec_file) {
-
+        console.log('inside run');
         //Change to z-frontend root for spec files to be discovered by cypress (only after graphql starts)
         process.chdir(path.join(process.cwd(), '../../', projectPath));
 
@@ -116,22 +122,25 @@ function main(){
           }
 
         }).then((results) => {
-          console.log(results)
+          console.log(results);
+          process.exit();
         }) .catch((err) => {
-          console.error(err)
+          console.error(err);
+          process.exit();
         })
-
+        console.log('after run');
 
       }
 
     });
-
+    console.log('after config read');
 
     //if not testem quit
     if (program.spec_file) {
+			  console.log('before return');
         return
     }
-
+    console.log('before api');
 
     var api = new Api();
     api.setup = function(mode, finalizer) {
@@ -202,9 +211,7 @@ var end = function () {
 }
 
 process.on('SIGINT', end);
-console.log('SIGINT here');
 process.on('exit', end);
-console.log('exit here');
 process.on('uncaughtException', function (err) {
   console.error('Uncaught global exception in testem-wrap');
   console.error(err.message);
@@ -218,4 +225,3 @@ process.on('uncaughtException', function (err) {
   catch(e) {}
   process.exit();
 });
-
