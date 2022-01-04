@@ -116,10 +116,8 @@ function main(){
 
         }).then((results) => {
           console.log(results);
-          process.exit();
         }) .catch((err) => {
           console.error(err);
-          process.exit();
         })
 
       }
