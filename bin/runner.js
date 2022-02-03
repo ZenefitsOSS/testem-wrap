@@ -95,7 +95,6 @@ function main(){
       //if not cypress return early
       startGraphqlServer();
       if (program.spec_file) {
-
         //Change to z-frontend root for spec files to be discovered by cypress (only after graphql starts)
         process.chdir(path.join(process.cwd(), '../../', projectPath));
 
@@ -116,22 +115,19 @@ function main(){
           }
 
         }).then((results) => {
-          console.log(results)
+          console.log(results);
         }) .catch((err) => {
-          console.error(err)
+          console.error(err);
         })
-
 
       }
 
     });
 
-
     //if not testem quit
     if (program.spec_file) {
         return
     }
-
 
     var api = new Api();
     api.setup = function(mode, finalizer) {
@@ -191,7 +187,7 @@ function act(fun){
 var ended = false;
 var end = function () {
   if (!ended) {
-    end = true;
+    ended = true;
     bridge.sendCmd({command: 'done'});
     bridge.stop();
   }
