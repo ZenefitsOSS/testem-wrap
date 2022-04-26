@@ -116,8 +116,16 @@ function main(){
 
         }).then((results) => {
           //console.log(results);
+          if (results['totalTests'] === results['totalPassed']) {
+            bridge.sendCmd({command: 'done'});
+          } else {
+            bridge.sendCmd({command: 'failed'});
+          }
           bridge.sendCmd({command: 'done'});
-          console.log('0000'); //this acts as sentinel for python iter(stdout.readline, sentinel)
+          setTimeout(function() {
+            console.log('0000'); //this acts as sentinel for python iter(stdout.readline, sentinel)
+          }, 500);
+          bridge.stop();
         }) .catch((err) => {
           console.error(err);
         })
