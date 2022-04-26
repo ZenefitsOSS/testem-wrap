@@ -121,7 +121,6 @@ function main(){
           } else {
             bridge.sendCmd({command: 'failed'});
           }
-          bridge.sendCmd({command: 'done'});
           setTimeout(function() {
             console.log('0000'); //this acts as sentinel for python iter(stdout.readline, sentinel)
           }, 500);
@@ -196,12 +195,9 @@ function act(fun){
 
 var ended = false;
 var end = function () {
-  console.log('//////INSIDE END////');
   if (!ended) {
     ended = true;
-    console.log('//////BEFORE SENDCMD////');
     bridge.sendCmd({command: 'done'});
-    console.log('//////AFTER SENDCMD////');
     bridge.stop();
   }
 }
