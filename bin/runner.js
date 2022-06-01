@@ -112,6 +112,7 @@ function main(){
           project: program.project_path,
           env: {
             'projectPath': appPath, //this projectPath is different from the one passed to testem wrap
+            ...((process.env.IS_CLOUD_DEV !== undefined) && { 'cloudDevUrl': 'http://localhost:80' }),
           }
 
         }).then((results) => {
